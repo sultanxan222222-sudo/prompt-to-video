@@ -31,3 +31,5 @@ jobs:
         run: npm run lint
       - name: Собрать приложение
         run: npm run build
+
+# CI trigger: verify the complete video studio build on the active branch.
