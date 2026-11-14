@@ -12,9 +12,9 @@ export interface GenerationRecord {
 }
 
 export const ASPECT_PRESETS = {
-  landscape: { label: "Landscape (16:9-ish)", width: 704, height: 512 },
-  portrait: { label: "Portrait (9:16-ish)", width: 512, height: 704 },
-  square: { label: "Square", width: 576, height: 576 },
+  landscape: { label: "Альбомный", width: 704, height: 512 },
+  portrait: { label: "Вертикальный", width: 512, height: 704 },
+  square: { label: "Квадратный", width: 576, height: 576 },
 } as const;
 
 export type AspectKey = keyof typeof ASPECT_PRESETS;
