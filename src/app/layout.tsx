@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prompt to Video",
-  description: "Generate short videos from a text prompt using an open-source model.",
+  title: "Новогодняя видеостудия",
+  description: "Создание коротких видео из текста на модели LTX-Video.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
