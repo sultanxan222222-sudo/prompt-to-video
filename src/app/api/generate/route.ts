@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     seed,
     randomizeSeed,
     guidanceScale,
+    hfToken,
   } = body as Record<string, unknown>;
 
   if (typeof prompt !== "string" || !prompt.trim()) {
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
       seed: typeof seed === "number" ? seed : undefined,
       randomizeSeed: typeof randomizeSeed === "boolean" ? randomizeSeed : undefined,
       guidanceScale: typeof guidanceScale === "number" ? guidanceScale : undefined,
+      authToken: typeof hfToken === "string" ? hfToken : undefined,
     });
 
     return NextResponse.json(result);
