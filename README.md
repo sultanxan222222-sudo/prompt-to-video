@@ -1,52 +1,32 @@
-# Prompt to Video
+# Новогодняя видеостудия
 
-A Next.js app that turns a text prompt into a short video, for free, using
-[LTX-Video 13B (distilled)](https://huggingface.co/spaces/Lightricks/ltx-video-distilled) —
-an open-source text-to-video model — running on a public Hugging Face Space
-backed by ZeroGPU. No local GPU, no paid API required.
+Бесплатная веб-студия для создания примерно 30-секундной новогодней концовки из четырёх отдельных видеосцен на модели LTX-Video 13B Distilled в публичном Hugging Face Space.
 
-## How it works
+## Что делает студия
 
-- The browser posts your prompt to `POST /api/generate` (`src/app/api/generate/route.ts`).
-- That route calls `src/lib/hf-space.ts`, which submits a job to the Space's
-  Gradio HTTP API (`/gradio_api/call/text_to_video`) and polls the SSE event
-  stream until the video is ready, then returns its URL.
-- The Space is free and shared, so generation typically takes 30s–3min
-  depending on the queue.
+Одной кнопкой создаёт четыре сцены в альбомном формате 16:9:
+1. Полицейский улыбается и отпускает водителя.
+2. Машины начинают движение по заснеженной улице.
+3. Появляется праздничная колонна украшенных автомобилей.
+4. Камера отдаляется к сияющей ёлке, над городом расцветает салют.
 
-If the Space ever goes down, is renamed, or you want to swap in a different
-model, everything model-specific lives in `src/lib/hf-space.ts` — that's the
-only file you need to change.
+Каждая сцена генерируется отдельно примерно по 7 секунд. Затем браузер соединяет четыре фрагмента и добавляет двухсекундную финальную паузу. Итог сохраняется в формате WebM без звука.
 
-## Getting started
+## Модель и бесплатные ограничения
+
+Генерация выполняется на публичном Space Lightricks/LTX-Video-Distilled, а не на компьютере пользователя. Доступность зависит от очереди и бесплатной квоты Hugging Face. По опубликованной документации Hugging Face, для ZeroGPU указана квота 2 минуты в день для анонимных запросов и 5 минут в день для бесплатного аккаунта. Для полной концовки рекомендуется бесплатный аккаунт и read-токен. Поле токена в интерфейсе необязательное; токен передаётся только для запроса и не сохраняется в истории.
+
+## Запуск локально
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+## Бесплатное размещение
 
-## Optional: Hugging Face token
+В корне проекта находится `render.yaml` для бесплатного веб-сервиса Render. Бесплатный сервис может засыпать после 15 минут без запросов; первый запуск после сна может занять около минуты. Платный тариф не нужен.
 
-The app works out of the box with anonymous requests, but anonymous ZeroGPU
-quota is small and shared by everyone. For a smoother experience:
+## Проверки
 
-1. Create a free account at https://huggingface.co/join
-2. Create a free read-scoped access token at https://huggingface.co/settings/tokens
-3. Copy `.env.local.example` to `.env.local` and paste the token into `HF_TOKEN`
-
-Restart `npm run dev` after adding the token.
-
-## Notes / limitations
-
-- This depends on a third-party public Space staying online. It's popular
-  and actively maintained, but free demos can occasionally be paused,
-  rate-limited, or changed.
-- Generation is capped at 5 minutes server-side (`maxDuration` in the API
-  route); very long/busy queues can time out.
-- If you deploy this (e.g. to Vercel), note serverless function timeout
-  limits on your plan — this workload needs a runtime that can hold a
-  connection open for minutes, which the free Vercel tier does not allow.
-  Running it on a normal Node server (or Vercel Pro+ with an increased
-  timeout) works fine.
+GitHub Actions workflow `.github/workflows/verify.yml` настроен на TypeScript, ESLint и production build для ветки `russian-new-year-ui`. Успешный запуск должен быть подтверждён в разделе Actions; до этого сборка не считается проверенной.
