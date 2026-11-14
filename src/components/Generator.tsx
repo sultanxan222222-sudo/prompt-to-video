@@ -146,7 +146,7 @@ export default function Generator() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!prompt.trim() || status !== "idle") return;
+    if (!prompt.trim() || status === "loading" || status === "assembling") return;
 
     setStatus("loading");
     setErrorMessage("");
@@ -165,7 +165,7 @@ export default function Generator() {
   }
 
   async function handleCreateEnding() {
-    if (status !== "idle") return;
+    if (status === "loading" || status === "assembling") return;
     setStatus("loading");
     setErrorMessage("");
     setEndingClips([]);
@@ -198,7 +198,7 @@ export default function Generator() {
   }
 
   async function handleAssembleEnding() {
-    if (endingClips.length !== ENDING_SCENES.length || status !== "idle") return;
+    if (endingClips.length !== ENDING_SCENES.length || status === "loading" || status === "assembling") return;
     if (typeof MediaRecorder === "undefined") {
       setErrorMessage("Этот браузер не поддерживает сборку видео. Открой студию в актуальном Chrome.");
       setStatus("error");
