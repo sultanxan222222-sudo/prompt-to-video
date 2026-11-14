@@ -1,0 +1,33 @@
+name: Проверка видеостудии
+
+on:
+  push:
+    branches:
+      - russian-new-year-ui
+  pull_request:
+    branches:
+      - russian-new-year-ui
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Получить исходный код
+        uses: actions/checkout@v4
+      - name: Установить Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Установить зависимости
+        run: npm ci
+      - name: Проверить TypeScript
+        run: npx tsc --noEmit
+      - name: Проверить ESLint
+        run: npm run lint
+      - name: Собрать приложение
+        run: npm run build
