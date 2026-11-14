@@ -24,14 +24,7 @@ const ENDING_SCENES = [
   },
 ];
 
-const STATUS_MESSAGES = [
-  "Подготавливаем видеокарту…",
-  "Ожидаем свободное место в очереди…",
-  "Создаём первые кадры…",
-  "Оживляем сцену…",
-  "Улучшаем детали изображения…",
-  "Почти готово…",
-];
+
 
 function loadHistory(): GenerationRecord[] {
   if (typeof window === "undefined") return [];
@@ -91,7 +84,7 @@ export default function Generator() {
     timerRef.current = setInterval(() => {
       tick += 1;
       setElapsed(tick);
-      setStatusMessage(STATUS_MESSAGES[Math.min(Math.floor(tick / 8), STATUS_MESSAGES.length - 1)]);
+      setStatusMessage("Сервер обрабатывает запрос…");
     }, 1000);
   }
 
@@ -172,10 +165,8 @@ export default function Generator() {
     setErrorMessage("");
     setEndingClips([]);
     setEndingProgress(0);
-    setFinalVideoUrl((old) => {
-      if (old) URL.revokeObjectURL(old);
-      return null;
-    });
+    if (finalVideoUrl) URL.revokeObjectURL(finalVideoUrl);
+    setFinalVideoUrl(null);
     startTimer();
 
     const created: GenerationRecord[] = [];
@@ -265,7 +256,11 @@ export default function Generator() {
         }
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         if (i === endingClips.length - 1) {
-          await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+          const holdUntil = performance.now() + 2000;
+          while (performance.now() < holdUntil) {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+          }
         }
         video.pause();
         video.removeAttribute("src");
@@ -280,10 +275,8 @@ export default function Generator() {
       const blob = new Blob(chunks, { type: recorder.mimeType || "video/webm" });
       if (blob.size === 0) throw new Error("Итоговый видеофайл оказался пустым.");
       const nextUrl = URL.createObjectURL(blob);
-      setFinalVideoUrl((old) => {
-        if (old) URL.revokeObjectURL(old);
-        return nextUrl;
-      });
+      if (finalVideoUrl) URL.revokeObjectURL(finalVideoUrl);
+      setFinalVideoUrl(nextUrl);
       setStatus("idle");
       setStatusMessage("Готово! Все сцены соединены в один ролик.");
     } catch (err) {
