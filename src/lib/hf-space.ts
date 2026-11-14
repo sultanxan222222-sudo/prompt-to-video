@@ -119,11 +119,9 @@ export async function generateVideo(
 }
 
 function parseSseResult(raw: string): GenerateVideoResult {
-  // The stream looks like repeated blocks of:
-  //   event: <name>\n
-  //   data: <json>\n\n
-  // We want the last "complete" event; "error"/"heartbeat" can also appear.
-  const blocks = raw.split("\n\n").filter(Boolean);
+  // Gradio sends an SSE stream. A Video output is normally shaped as
+  // { video: { path, url, ... }, subtitles: null }, followed by the seed.
+  const blocks = raw.split(/\r?\n\r?\n/).filter(Boolean);
 
   for (const block of blocks.reverse()) {
     const eventMatch = block.match(/^event:\s*(\S+)/m);
@@ -134,17 +132,45 @@ function parseSseResult(raw: string): GenerateVideoResult {
     if (eventName === "error") {
       throw new InferenceError(`Ошибка генерации на сервере модели: ${dataMatch[1]}`);
     }
-    if (eventName === "complete") {
-      const payload = JSON.parse(dataMatch[1]);
-      const [videoField, seedUsed] = payload as [
-        { video: { url: string } },
-        number,
-      ];
-      if (!videoField?.video?.url) {
-        throw new InferenceError("Сервер завершил задачу, но не вернул видео.");
-      }
-      return { videoUrl: videoField.video.url, seedUsed };
+    if (eventName !== "complete") continue;
+
+    let payload: unknown;
+    try {
+      payload = JSON.parse(dataMatch[1]);
+    } catch {
+      throw new InferenceError("Сервер вернул повреждённый ответ вместо видео.");
     }
+
+    if (!Array.isArray(payload) || payload.length < 1) {
+      throw new InferenceError("Сервер завершил задачу, но не вернул видео.");
+    }
+
+    const output = payload[0] as
+      | { video?: string | { url?: string | null; path?: string | null } | null; url?: string | null; path?: string | null }
+      | string
+      | null;
+    const file = typeof output === "string"
+      ? output
+      : output && typeof output === "object"
+        ? output.video ?? output
+        : null;
+    const rawUrl = typeof file === "string"
+      ? file
+      : file && typeof file === "object"
+        ? file.url ?? null
+        : null;
+
+    if (!rawUrl) {
+      throw new InferenceError("Сервер завершил задачу, но не передал ссылку на видео.");
+    }
+
+    const videoUrl = rawUrl.startsWith("http")
+      ? rawUrl
+      : `${SPACE_BASE_URL}/${rawUrl.replace(/^\/+/, "")}`;
+    const seedValue = payload[1];
+    const seedUsed = typeof seedValue === "number" ? seedValue : 0;
+
+    return { videoUrl, seedUsed };
   }
 
   throw new InferenceError("Время ожидания истекло или сервер закрыл соединение до завершения генерации.");
