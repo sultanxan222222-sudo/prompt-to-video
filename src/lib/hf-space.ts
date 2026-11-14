@@ -46,7 +46,7 @@ export async function generateVideo(
   params: GenerateVideoParams,
 ): Promise<GenerateVideoResult> {
   const prompt = params.prompt.trim();
-  if (!prompt) throw new InferenceError("Prompt is required.");
+  if (!prompt) throw new InferenceError("Необходимо написать описание сцены.");
 
   const width = clamp(params.width ?? 704, LIMITS.width.min, LIMITS.width.max);
   const height = clamp(params.height ?? 512, LIMITS.height.min, LIMITS.height.max);
@@ -98,12 +98,12 @@ export async function generateVideo(
 
   if (!submitRes.ok) {
     throw new InferenceError(
-      `Failed to submit generation job (HTTP ${submitRes.status}). The Space may be paused or overloaded — try again shortly.`,
+      `Не удалось отправить задание (HTTP ${submitRes.status}). Сервер может быть перегружен или временно недоступен. Попробуйте позже.`,
     );
   }
 
   const { event_id: eventId } = (await submitRes.json()) as { event_id: string };
-  if (!eventId) throw new InferenceError("Space did not return a job id.");
+  if (!eventId) throw new InferenceError("Сервер не вернул номер задания.");
 
   const resultRes = await fetch(
     `${SPACE_BASE_URL}/gradio_api/call/${API_NAME}/${eventId}`,
@@ -111,7 +111,7 @@ export async function generateVideo(
   );
 
   if (!resultRes.ok || !resultRes.body) {
-    throw new InferenceError(`Lost connection while waiting for the video (HTTP ${resultRes.status}).`);
+    throw new InferenceError(`Соединение с сервером прервалось во время ожидания видео (HTTP ${resultRes.status}).`);
   }
 
   const raw = await resultRes.text();
@@ -132,7 +132,7 @@ function parseSseResult(raw: string): GenerateVideoResult {
 
     const eventName = eventMatch[1];
     if (eventName === "error") {
-      throw new InferenceError(`Generation failed on the model Space: ${dataMatch[1]}`);
+      throw new InferenceError(`Ошибка генерации на сервере модели: ${dataMatch[1]}`);
     }
     if (eventName === "complete") {
       const payload = JSON.parse(dataMatch[1]);
@@ -141,11 +141,11 @@ function parseSseResult(raw: string): GenerateVideoResult {
         number,
       ];
       if (!videoField?.video?.url) {
-        throw new InferenceError("Space returned a result with no video.");
+        throw new InferenceError("Сервер завершил задачу, но не вернул видео.");
       }
       return { videoUrl: videoField.video.url, seedUsed };
     }
   }
 
-  throw new InferenceError("Generation timed out or the Space closed the connection before finishing.");
+  throw new InferenceError("Время ожидания истекло или сервер закрыл соединение до завершения генерации.");
 }
