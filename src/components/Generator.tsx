@@ -54,8 +54,9 @@ function playableUrl(url: string) {
 export default function Generator() {
   const [prompt, setPrompt] = useState(ENDING_SCENES[0].prompt);
   const [negativePrompt, setNegativePrompt] = useState("worst quality, blurry, distorted, watermark, deformed cars, extra wheels, unnatural faces, flicker");
+  const [hfToken, setHfToken] = useState("");
   const [aspect, setAspect] = useState<AspectKey>("landscape");
-  const [duration, setDuration] = useState(7.5);
+  const [duration, setDuration] = useState(7);
   const [guidanceScale, setGuidanceScale] = useState(1);
   const [randomizeSeed, setRandomizeSeed] = useState(true);
   const [seed, setSeed] = useState(42);
@@ -115,6 +116,7 @@ export default function Generator() {
         height,
         durationSeconds: clipDuration,
         guidanceScale,
+        hfToken: hfToken.trim() || undefined,
         randomizeSeed,
         seed,
       }),
@@ -180,7 +182,7 @@ export default function Generator() {
     try {
       for (let i = 0; i < ENDING_SCENES.length; i += 1) {
         setStatusMessage(`Создаём сцену ${i + 1} из ${ENDING_SCENES.length}: ${ENDING_SCENES[i].title}`);
-        const record = await requestClip(ENDING_SCENES[i].prompt, 7.5, "landscape");
+        const record = await requestClip(ENDING_SCENES[i].prompt, 7, "landscape");
         created.push(record);
         setEndingClips([...created]);
         setEndingProgress(i + 1);
@@ -262,6 +264,9 @@ export default function Generator() {
           await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
         }
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        if (i === endingClips.length - 1) {
+          await new Promise<void>((resolve) => setTimeout(resolve, 2000));
+        }
         video.pause();
         video.removeAttribute("src");
         video.load();
@@ -308,7 +313,7 @@ export default function Generator() {
         <div className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold">Готовая концовка — около 30 секунд</h2>
           <p className="text-sm text-neutral-700 dark:text-neutral-300">
-            Студия последовательно создаст четыре фрагмента по 7,5 секунды: прощание полицейского, движение машин, праздничную колонну и финальный салют. Затем соединит их в один видеофайл.
+            Студия последовательно создаст четыре фрагмента примерно по 7 секунд и добавит 2-секундную финальную паузу: прощание полицейского, движение машин, праздничную колонну и финальный салют. Затем соединит их в один видеофайл.
           </p>
           <ol className="list-inside list-decimal space-y-1 text-sm text-neutral-700 dark:text-neutral-300">
             {ENDING_SCENES.map((scene) => <li key={scene.title}>{scene.title}</li>)}
@@ -338,6 +343,12 @@ export default function Generator() {
           )}
         </div>
       </section>
+
+      <label className="flex flex-col gap-1.5 rounded-xl border border-neutral-200 p-4 text-sm dark:border-neutral-800">
+        <span className="font-medium">Бесплатный токен Hugging Face (необязательно)</span>
+        <input type="password" autoComplete="off" value={hfToken} onChange={(e) => setHfToken(e.target.value)} placeholder="Вставь read-токен, если он у тебя есть" className="rounded-lg border border-neutral-300 bg-transparent px-3 py-2 text-sm dark:border-neutral-700" />
+        <span className="text-xs text-neutral-500">Без токена используется общий анонимный лимит. Для четырёх сцен лучше бесплатный аккаунт и read-токен. Токен не сохраняется в истории и используется только для запросов. <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="underline">Создать токен</a>.</span>
+      </label>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <h2 className="text-base font-semibold">Или создать отдельную сцену</h2>
