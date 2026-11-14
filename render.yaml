@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: novogodnyaya-videostudiya
+    runtime: node
+    plan: free
+    branch: russian-new-year-ui
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
