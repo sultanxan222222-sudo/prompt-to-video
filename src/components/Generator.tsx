@@ -206,8 +206,8 @@ export default function Generator() {
     let recorder: MediaRecorder | null = null;
     try {
       const canvas = document.createElement("canvas");
-      canvas.width = 704;
-      canvas.height = 512;
+      canvas.width = 768;
+      canvas.height = 432;
       const context = canvas.getContext("2d");
       if (!context || typeof canvas.captureStream !== "function") {
         throw new Error("Браузер не поддерживает сборку видео на этом устройстве.");
