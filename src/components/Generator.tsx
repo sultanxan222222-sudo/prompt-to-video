@@ -56,7 +56,7 @@ export default function Generator() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "assembling" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const [statusMessage, setStatusMessage] = useState(STATUS_MESSAGES[0]);
+  const [statusMessage, setStatusMessage] = useState("Подготовка к генерации…");
   const [elapsed, setElapsed] = useState(0);
   const [result, setResult] = useState<GenerationRecord | null>(null);
   const [history, setHistory] = useState<GenerationRecord[]>([]);
