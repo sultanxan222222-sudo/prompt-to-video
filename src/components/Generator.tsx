@@ -177,7 +177,7 @@ export default function Generator() {
         <label className="flex flex-col gap-1.5">
           <span className="flex justify-between text-sm font-medium">
             <span>Длительность ролика</span>
-            <span className="text-neutral-500 dark:text-neutral-400">{duration.toFixed(1)}s</span>
+            <span className="text-neutral-500 dark:text-neutral-400">{duration.toFixed(1)} сек.</span>
           </span>
           <input
             type="range"
@@ -283,7 +283,7 @@ export default function Generator() {
             className="w-full rounded-lg bg-black"
           />
           <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-            <span>Код варианта: {result.seedUsed}</span>
+            <span>Номер варианта: {result.seedUsed}</span>
             <a href={result.videoUrl} download target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-200">
               Скачать видео
             </a>
