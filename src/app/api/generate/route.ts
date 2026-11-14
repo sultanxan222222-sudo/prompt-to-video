@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+    return NextResponse.json({ error: "Некорректный запрос." }, { status: 400 });
   }
 
   const {
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   } = body as Record<string, unknown>;
 
   if (typeof prompt !== "string" || !prompt.trim()) {
-    return NextResponse.json({ error: "Prompt is required." }, { status: 400 });
+    return NextResponse.json({ error: "Необходимо написать описание сцены." }, { status: 400 });
   }
 
   try {
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(result);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Video generation failed.";
+    const message = err instanceof Error ? err.message : "Не удалось создать видео.";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }
