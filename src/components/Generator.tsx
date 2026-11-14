@@ -285,7 +285,7 @@ export default function Generator() {
           <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
             <span>Код варианта: {result.seedUsed}</span>
             <a href={result.videoUrl} download target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-200">
-              Download
+              Скачать видео
             </a>
           </div>
         </div>
