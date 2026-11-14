@@ -7,12 +7,12 @@ const HISTORY_KEY = "prompt-to-video:history";
 const MAX_HISTORY = 12;
 
 const STATUS_MESSAGES = [
-  "Warming up the GPU…",
-  "Waiting in the shared queue…",
-  "Sketching the first frames…",
-  "Animating motion…",
-  "Upscaling texture detail…",
-  "Almost there…",
+  "Подготавливаем видеокарту…",
+  "Ожидаем свободное место в очереди…",
+  "Создаём первые кадры…",
+  "Оживляем сцену…",
+  "Улучшаем детали изображения…",
+  "Почти готово…",
 ];
 
 function loadHistory(): GenerationRecord[] {
@@ -30,10 +30,10 @@ function saveHistory(records: GenerationRecord[]) {
 }
 
 export default function Generator() {
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState("Cinematic realistic Christmas winter night in a snowy European city. A smiling police officer warmly waves goodbye to a driver. Cars begin moving along a snow-covered street, festive decorated cars with glowing Christmas lights join a joyful parade. Beautiful realistic lighting, gentle snowfall, cinematic camera movement, detailed natural faces, no cartoon style, no text, no logos.");
   const [negativePrompt, setNegativePrompt] = useState("worst quality, blurry, distorted, watermark");
   const [aspect, setAspect] = useState<AspectKey>("landscape");
-  const [duration, setDuration] = useState(3);
+  const [duration, setDuration] = useState(8);
   const [guidanceScale, setGuidanceScale] = useState(1);
   const [randomizeSeed, setRandomizeSeed] = useState(true);
   const [seed, setSeed] = useState(42);
@@ -117,7 +117,7 @@ export default function Generator() {
       });
       setStatus("idle");
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Something went wrong.");
+      setErrorMessage(err instanceof Error ? err.message : "Произошла ошибка.");
       setStatus("error");
     } finally {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -129,9 +129,9 @@ export default function Generator() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-10">
       <header className="text-center">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Prompt to Video</h1>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Новогодняя видеостудия</h1>
         <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-          Free text-to-video generation powered by{" "}
+          Бесплатная генерация видео на модели{" "}
           <a
             href="https://huggingface.co/spaces/Lightricks/ltx-video-distilled"
             target="_blank"
@@ -140,17 +140,17 @@ export default function Generator() {
           >
             LTX-Video 13B (distilled)
           </a>{" "}
-          running on a shared Hugging Face GPU — generation can take 30s&ndash;3min depending on queue.
+          на общем сервере Hugging Face. Время ожидания зависит от очереди.
         </p>
       </header>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Prompt</span>
+          <span className="text-sm font-medium">Описание сцены</span>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="A majestic dragon flying over a medieval castle at sunset, cinematic"
+            placeholder="Опиши, что должно происходить в кадре…"
             rows={3}
             required
             className="resize-none rounded-lg border border-neutral-300 bg-transparent px-3 py-2 text-sm outline-none focus:border-neutral-500 dark:border-neutral-700"
@@ -176,13 +176,13 @@ export default function Generator() {
 
         <label className="flex flex-col gap-1.5">
           <span className="flex justify-between text-sm font-medium">
-            <span>Duration</span>
+            <span>Длительность ролика</span>
             <span className="text-neutral-500 dark:text-neutral-400">{duration.toFixed(1)}s</span>
           </span>
           <input
             type="range"
             min={1}
-            max={6}
+            max={8.5}
             step={0.5}
             value={duration}
             onChange={(e) => setDuration(Number(e.target.value))}
@@ -194,13 +194,13 @@ export default function Generator() {
           onClick={() => setShowAdvanced((v) => !v)}
           className="self-start text-xs font-medium text-neutral-500 underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-300"
         >
-          {showAdvanced ? "Hide advanced options" : "Show advanced options"}
+          {showAdvanced ? "Скрыть дополнительные настройки" : "Дополнительные настройки"}
         </button>
 
         {showAdvanced && (
           <div className="flex flex-col gap-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
             <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium">Negative prompt</span>
+              <span className="text-sm font-medium">Что исключить из кадра</span>
               <input
                 type="text"
                 value={negativePrompt}
@@ -211,7 +211,7 @@ export default function Generator() {
 
             <label className="flex flex-col gap-1.5">
               <span className="flex justify-between text-sm font-medium">
-                <span>Guidance scale (CFG)</span>
+                <span>Точность следования описанию (CFG)</span>
                 <span className="text-neutral-500 dark:text-neutral-400">{guidanceScale.toFixed(1)}</span>
               </span>
               <input
@@ -223,7 +223,7 @@ export default function Generator() {
                 onChange={(e) => setGuidanceScale(Number(e.target.value))}
               />
               <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                LTX-Video generally looks best with a low value (1&ndash;3).
+                Для LTX-Video обычно подходят небольшие значения (1–3).
               </span>
             </label>
 
@@ -234,7 +234,7 @@ export default function Generator() {
                   checked={randomizeSeed}
                   onChange={(e) => setRandomizeSeed(e.target.checked)}
                 />
-                Randomize seed
+                Случайный вариант
               </label>
               {!randomizeSeed && (
                 <input
@@ -253,7 +253,7 @@ export default function Generator() {
           disabled={isLoading || !prompt.trim()}
           className="mt-2 rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
         >
-          {isLoading ? `Generating… ${elapsed}s` : "Generate video"}
+          {isLoading ? `Создаём видео… ${elapsed} сек.` : "Создать видео"}
         </button>
       </form>
 
@@ -283,7 +283,7 @@ export default function Generator() {
             className="w-full rounded-lg bg-black"
           />
           <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400">
-            <span>seed {result.seedUsed}</span>
+            <span>Код варианта: {result.seedUsed}</span>
             <a href={result.videoUrl} download target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-200">
               Download
             </a>
@@ -293,7 +293,7 @@ export default function Generator() {
 
       {history.length > 0 && (
         <div className="flex flex-col gap-3">
-          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">History</h2>
+          <h2 className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">История видео</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {history.map((item) => (
               <button
