@@ -12,7 +12,7 @@ export interface GenerationRecord {
 }
 
 export const ASPECT_PRESETS = {
-  landscape: { label: "Альбомный", width: 704, height: 512 },
+  landscape: { label: "Альбомный 16:9", width: 768, height: 432 },
   portrait: { label: "Вертикальный", width: 512, height: 704 },
   square: { label: "Квадратный", width: 576, height: 576 },
 } as const;
