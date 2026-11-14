@@ -19,6 +19,7 @@ export interface GenerateVideoParams {
   seed?: number;
   randomizeSeed?: boolean;
   guidanceScale?: number;
+  authToken?: string;
 }
 
 export interface GenerateVideoResult {
@@ -86,8 +87,9 @@ export async function generateVideo(
   ];
 
   const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (process.env.HF_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.HF_TOKEN}`;
+  const authToken = params.authToken?.trim() || process.env.HF_TOKEN;
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`;
   }
 
   const submitRes = await fetch(`${SPACE_BASE_URL}/gradio_api/call/${API_NAME}`, {
